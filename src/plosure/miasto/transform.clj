@@ -38,7 +38,6 @@
                [:R2 nil nil]]
               [:R1 nil nil]] )
 
-
 (defn left-tree-size [v]
   (let [ones (map #(if (= (first %) :enter) +1 -1) v)]
     (inc (.indexOf (vec (map #(apply + (take % ones)) (range 1 (count ones)))) 0))))

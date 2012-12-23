@@ -1,6 +1,5 @@
 (ns plosure.math.sqrt)
 
-
 (defn sqrt [x]
   "square root of x"
   {:pre [(< 0 x)]}
