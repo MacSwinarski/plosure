@@ -2,6 +2,8 @@
 
 
 (defn sqrt [x]
+  "square root of x"
+  {:pre [(< 0 x)]}
   (let [ys (rest (range))
         zs (map #(/ x %) ys)
         avgs (map #(/ (+ %1 %2) 2) ys zs)
