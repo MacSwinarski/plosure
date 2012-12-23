@@ -1,0 +1,10 @@
+/pom.xml
+*jar
+/lib
+/classes
+/native
+/checkouts
+/.idea
+/plosure.iml
+/.lein-*
+/.env
