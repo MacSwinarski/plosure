@@ -5,6 +5,11 @@
   (let [fx (f x)]
     (cons fx (lazy-seq (fsek f fx)))))
 
+(defn abs [x]
+  (cond
+    (> 0 x) (- x))
+    (<= 0 x) x)
+
 (defn fp
   "finds function fixed point"
   ([f] (fp f 1))
