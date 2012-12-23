@@ -14,9 +14,12 @@
         idx (first (first (filter #(< (Math/abs (second %)) (+ 1.0 1e-10)) idx-fsek-diff)))]
     (nth fsek idx))))
 
+(defn avg [x y]
+  (/ (+ x y) 2.0))
+
 (defn sqrtfn [n]
   {:pre [(< 0 n)]}
-  (fn [x] (/ (+ (/ n x) x) 2.0)))
+  (fn [x] (avg (/ n x) x)))
 
 (defn -main []
   (println "fp(sqrtfn(2)) =" (fp (sqrtfn 2)))
