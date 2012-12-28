@@ -19,8 +19,12 @@
         (and (nil? v1) (nil? v2))
         (and (= v1 v2) (sym? l1 r2) (sym? r1 l2))))))
 
+(def maximental #(= % ((fn m [[v l r]] (if v [v (m r) (m l)])) %)))
 
-(def bs? bs2?)
+
+;(def bs? bs1?)
+;(def bs? bs2?)
+(def bs? maximental)
 
 (defn -main[]
   (do
