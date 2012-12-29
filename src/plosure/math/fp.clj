@@ -16,7 +16,7 @@
   ([f x] (let [fsek (fsek f x)
         fsek-diff (map #(/ %1 %2) fsek (rest fsek))
         idx-fsek-diff (map-indexed vector fsek-diff)
-        idx (first (first (filter #(< (Math/abs (second %)) (+ 1.0 1e-10)) idx-fsek-diff)))]
+        idx (first (first (filter #(< (abs (second %)) (+ 1.0 1e-10)) idx-fsek-diff)))]
     (nth fsek idx))))
 
 (defn avg [x y]
