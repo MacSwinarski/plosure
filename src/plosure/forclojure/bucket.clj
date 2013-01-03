@@ -94,18 +94,135 @@
 (println (= (f67 5) [2 3 5 7 11]))
 (println (= (last (f67 100)) 541))
 
-(println "76")
+(println "65")
 
-(defn f76 [c]  )
+(def f65
+  (fn [coll1]
+    (let [size1 (count coll1)
+          coll2 (into coll1 [[:t1 :t1] [:t1 :t1] [:t1 :t2]])
+          size2 (count coll2)]
+        (cond
+          (= (+ 1 size1) size2) :map
+          (= (+ 2 size1) size2) :set
+          (= (first coll2) [:t1 :t2]) :list
+          (= (last coll2) [:t1 :t2]) :vector
+          :default :unknown ))))
+
+(println (= :map (f65 {:a 1, :b 2})))
+(println (= :list (f65 (range (rand-int 20)))))
+(println (= :vector (f65 [1 2 3 4 5 6])))
+(println (= :set (f65 #{10 (rand-int 5)})))
+(println (= [:map :set :vector :list] (map f65 [{} #{} [] ()])))
+
+(println "80")
+
+(def f80
+  (fn [n]
+    (= n (reduce + (filter #(= 0 (mod n %)) (range 1 n))))))
 
 
-(= __
-  (letfn
-    [(foo [x y] #(bar (conj x y) y))
-     (bar [x y] (if (> (last x) 10)
-                  x
-                  #(foo x (+ 2 y))))]
-    (trampoline foo [] 1)))
+(println (f80 6))
+(println (f80 7))
+
+(println "77")
+
+(def f77
+  #(set (filter (fn [coll] (< 1 (count coll))) (map set (vals (group-by sort %))))))
+
+(println (f77 ["veer" "lake" "item" "kale" "mite" "ever"]))
+
+(println (= (f77 ["meat" "mat" "team" "mate" "eat"])
+    #{#{"meat" "team" "mate"}}))
+
+(println (= (f77 ["veer" "lake" "item" "kale" "mite" "ever"])
+    #{#{"veer" "ever"} #{"lake" "kale"} #{"mite" "item"}}))
+
+(println "60")
+
+;(def f60
+;  (fn [f coll]
+;    (reduce (fn [results b]
+;              (let [a (last results)
+;                    c (if a (f a b) (f b))]
+;                (conj results c))) [] coll)))
+; watch out! reduce is !ofkoz! hue hue hue not lazy - will not work on infinite seqs
+
+(def f60
+  (fn f60
+    ([f coll] (f60 f nil coll))
+    ([f start coll] (let [reds (map
+                      (fn [e i] (if start (reduce f start (take i coll)) (reduce f (take i coll))))
+                      coll (rest (range)))]
+                      (if start (conj reds start) reds)))))
+
+(def maximental
+  (fn g
+  ([f [x & s]] (g f x s))
+  ([f a [x & s]]
+    (lazy-seq
+      (cons a (if x (g f (f a x) s)))))))
+
+(println (reductions + (range 5)))
+(println (f60 + (range 5)))
+(println (reductions conj [1] [2 3 4]))
+(println (f60 conj [1] [2 3 4]))
+(println (reductions * 2 [3 4 5]))
+(println (f60 * 2 [3 4 5]))
+
+
+(println (= (take 5 (f60 + (range))) [0 1 3 6 10]))
+(println (= (f60 conj [1] [2 3 4]) [[1] [1 2] [1 2 3] [1 2 3 4]]))
+(println (= (last (f60 * 2 [3 4 5])) (reduce * 2 [3 4 5]) 120))
+
+
+
+(println "102")
+
+(def f102
+  (fn [s]
+    (apply str
+      (reduce
+        (fn [coll b] (if (= \- (last coll)) (conj (vec (butlast coll)) (Character/toUpperCase b)) (conj coll b)))
+        []
+        (seq s)))))
+
+(println (f102 "multi-word-key"))
+
+(println (= (f102 "something") "something"))
+
+
+(println "86")
+
+
+(def f86
+  (fn f
+    ([n lim] (if (= 0 lim)
+               false
+               (let [text-n (str n)
+                     sqr-dig (reduce + (map #(let [i (- (int %) (int \0))] (* i i)) text-n))]
+                    (if (= 1 sqr-dig) true (recur sqr-dig (dec lim))))))
+    ([n] (f n 1000))))
+
+(println (f86 986543210))
+
+(println (= (f86 7) true))
+(println (= (f86 986543210) true))
+(println (= (f86 2) false))
+(println (= (f86 3) false))
+
+(println "78")
+
+(def f78
+  (fn [f & args]
+    (let [r (if (not (nil? args)) (apply f args) (f))]
+       (if (not (fn? r)) r (recur r nil)))))
+
+
+
+(println (= (letfn [(my-even? [x] (if (zero? x) true #(my-odd? (dec x))))
+           (my-odd? [x] (if (zero? x) false #(my-even? (dec x))))]
+     (map (partial f78 my-even?) (range 6)))
+  [true false true false true false]))
 
 
 
