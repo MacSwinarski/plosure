@@ -212,17 +212,186 @@
 
 (println "78")
 
-(def f78
+(def f78a
   (fn [f & args]
-    (let [r (if (not (nil? args)) (apply f args) (f))]
-       (if (not (fn? r)) r (recur r nil)))))
+    (let [r (apply f args)]
+       (if (fn? r) (recur r []) r))))
 
+;(def maximental #(loop [f (% %2)] (if (fn? f) (recur (f)) f)))
+;(def pcl (fn [& as]
+;   (let [r (apply (first as) (rest as))]
+;     (if (fn? r) (recur [r]) r))))
 
+(def f78b #(loop [f (%1 %2)] (if (fn? f) (recur (f)) f)))
+
+(def f78 f78a)
 
 (println (= (letfn [(my-even? [x] (if (zero? x) true #(my-odd? (dec x))))
            (my-odd? [x] (if (zero? x) false #(my-even? (dec x))))]
      (map (partial f78 my-even?) (range 6)))
   [true false true false true false]))
+
+
+(println "98")
+
+(def f98 #(set (map set (vals (group-by %1 %2)))))
+
+(println (f98 #(* % %) #{-2 -1 0 1 2}))
+
+(println (= (f98 #(* % %) #{-2 -1 0 1 2})
+    #{#{0} #{1 -1} #{2 -2}}))
+(println (= (f98 #(rem % 3) #{0 1 2 3 4 5 })
+    #{#{0 3} #{1 4} #{2 5}}))
+(println (= (f98 identity #{0 1 2 3 4})
+    #{#{0} #{1} #{2} #{3} #{4}}))
+(println (= (f98 (constantly true) #{0 1 2 3 4})
+    #{#{0 1 2 3 4}}))
+
+
+(println "85")
+
+;(defn f85 [coll]
+;  (let [n (count coll)
+;        c (for [i (range 0 (inc n))] (take i coll))]
+;    (conj (set (flatten (map #(map (fn [cc] (set (conj cc %))) c) coll))) #{} )))
+
+;(defn f85 [coll]
+;  (let [rotate (fn [coll n] (if (zero? n) coll (recur (cons (last coll) (butlast coll)) (dec n))))
+;        coll (cons nil coll)
+;        colls (for [n (range 0 (count coll))] (rotate coll n))]
+;    (apply map vector colls)
+;    ))
+
+
+(def comb1
+  (fn comb [coll]
+    (if (seq (rest coll))
+      (let [comb-rest (comb (rest coll))]
+        (concat (map #(set (cons (first coll) %)) comb-rest) comb-rest))
+      #{ #{} #{(first coll)} } )))
+
+;(def comb2
+;  (fn comb [coll]
+;    (if (first coll)
+;      (let [comb-rest (comb (rest coll))]
+;        (concat (map #(set (cons (first coll) %)) comb-rest) comb-rest))
+;        #{ #{} } )))
+
+(def comb2
+  (fn comb [coll]
+    (let [x (first coll) xs (rest coll)]
+      (if x
+        (let [comb-rest (comb xs)] (set (concat (map #(set (cons x %)) comb-rest) comb-rest)))
+        #{#{}} ))))
+
+
+(def maximental
+  (fn [s]
+    (reduce
+      (fn [a b]
+        (into a (map #(conj % b) a)))
+        #{#{}}
+      s)))
+
+(def mac2
+  (fn [coll]
+    (reduce
+      (fn [result b] (into result (map #(set (cons b %)) result)))
+      #{#{}}
+      coll)))
+
+; conj will return same type of collection, cons returns seq
+
+(def mac3
+  (fn [coll]
+    (reduce
+      (fn [result b] (into result (map #(conj % b) result)))
+        #{#{}}
+      coll)))
+
+;(def f85 comb2)
+(def f85 mac3)
+
+
+(println "comb1a" (comb1 #{1}))
+(println "comb2a" (comb1 #{1 2}))
+(println "comb3a" (comb1 #{1 2 3}))
+
+(println "comb1b" (comb2 #{1}))
+(println "comb2b" (comb2 #{1 2}))
+(println "comb3b" (comb2 #{1 2 3}))
+
+
+;  (let [n (count coll)
+;        x (apply * (repeat n 2))
+;        cc (range 0 x)]
+;    (for [c cc] (filter #(bit-test (first %) c) (map vector (range) coll)))))
+
+(println "f85a" (f85 #{1 2 3}))
+(println "f85b" (f85 #{1 :a}))
+
+(println (= (f85 #{1 :a}) #{#{1 :a} #{:a} #{} #{1}}))
+(println (= (f85 #{}) #{#{}}))
+(println (= (f85 #{1 2 3})
+    #{#{} #{1} #{2} #{3} #{1 2} #{1 3} #{2 3} #{1 2 3}}))
+(println (= (count (f85 (into #{} (range 10)))) 1024))
+
+
+(println "115")
+
+(def f115
+  (fn [n]
+    (let [digs (map #(- (int %) (int \0)) (seq (str n)))
+          i (quot (count digs) 2)
+          d (rem (count digs) 2)
+          digs1 (take i digs)
+          digs2 (drop (+ i d) digs)]
+      (= (reduce + digs1) (reduce + digs2)))))
+
+(println (f115 89089))
+(println "123" (f115 123))
+
+
+(println (= true (f115 11)))
+(println (= true (f115 121)))
+(println(= false (f115 123)))
+(println(= true (f115 0)))
+(println(= false (f115 88099)))
+(println(= true (f115 89098)))
+(println(= true (f115 89089)))
+;(println(= (take 20 (filter f115 (range)))
+;  [0 1 2 3 4 5 6 7 8 9 11 22 33 44 55 66 77 88 99 101]))
+
+
+(println "105")
+
+
+(def f105
+  (fn [coll]
+    (into {}
+      (reduce
+        (fn [a b]
+          (if (keyword? b)
+            (conj a [b []])
+            (let [xs (butlast a) x (last a)]
+              (vec (conj xs [(first x) (conj (second x) b)] )))))
+        []
+        coll))))
+
+
+(println (f105 [:a 1 2 3 :b :c 4]))
+
+(println (= {} (f105 [])))
+(println (= {:a [1]} (f105 [:a 1])))
+(println (= {:a [1], :b [2]} (f105 [:a 1, :b 2])))
+(println (= {:a [1 2 3], :b [], :c [4]} (f105 [:a 1 2 3 :b :c 4])))
+
+
+
+
+
+
+
 
 
 
